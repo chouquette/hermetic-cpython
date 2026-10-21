@@ -1,6 +1,7 @@
 """Bundled C libraries shipped in supported CPython release archives."""
 
 load("@cpython//python/private:versions.bzl", "CPYTHON_RELEASES")
+load("@cpython//python/private:copts.bzl", "VISIBILITY_COPTS")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
 def _supported_releases():
@@ -104,6 +105,7 @@ _BLAKE2_IMPLEMENTATION_SOURCES = [
 def _hacl_library(name, algorithm, visibility):
     cc_library(
         name = name,
+        copts = VISIBILITY_COPTS,
         srcs = ["Modules/_hacl/Hacl_Hash_{}.c".format(algorithm)],
         hdrs = native.glob(["Modules/_hacl/**/*.h"]),
         defines = [
@@ -157,6 +159,7 @@ def bundled_libraries(
 
     cc_library(
         name = "bundled_expat",
+        copts = VISIBILITY_COPTS,
         srcs = [
             "Modules/expat/xmlparse.c",
             "Modules/expat/xmlrole.c",
@@ -185,6 +188,7 @@ def bundled_libraries(
 
     cc_library(
         name = "bundled_libmpdec",
+        copts = VISIBILITY_COPTS,
         srcs = _LIBMPDEC_SOURCES,
         hdrs = _LIBMPDEC_HEADERS,
         defines = [
@@ -212,6 +216,7 @@ def bundled_libraries(
     if version in ["3.14", "3.14.5"]:
         cc_library(
             name = "bundled_hacl_blake2",
+            copts = VISIBILITY_COPTS,
             srcs = [
                 "Modules/_hacl/Hacl_Hash_Blake2b.c",
                 "Modules/_hacl/Hacl_Hash_Blake2s.c",
@@ -231,6 +236,7 @@ def bundled_libraries(
         )
         cc_library(
             name = "bundled_hacl_hmac",
+            copts = VISIBILITY_COPTS,
             srcs = [
                 "Modules/_hacl/Hacl_HMAC.c",
                 "Modules/_hacl/Hacl_Streaming_HMAC.c",

@@ -14,6 +14,15 @@ def _python_impl(module_ctx):
     dependencies = dict(DEPENDENCY_DEFAULTS)
 
     for module in module_ctx.modules:
+        for index, dependencies_tag in enumerate(module.tags.dependencies):
+            if not module.is_root:
+                fail("python.dependencies() may only be used by the root module, not {!r}".format(module.name))
+            if index > 0:
+                fail("python.dependencies() may only be used once")
+            for name in DEPENDENCY_DEFAULTS:
+                label = getattr(dependencies_tag, name)
+                if label:
+                    dependencies[name] = str(label)
         for version_tag in module.tags.version:
             version = version_tag.version
             if version not in CPYTHON_RELEASES:
@@ -99,9 +108,18 @@ _version = tag_class(
     doc = "Selects a supported Python minor version.",
 )
 
+_dependencies = tag_class(
+    attrs = {
+        name: attr.label(doc = "Replaces the default `{}`.".format(default))
+        for name, default in DEPENDENCY_DEFAULTS.items()
+    },
+    doc = "Replaces the native libraries linked into every selected CPython version. Root module only.",
+)
+
 python = module_extension(
     implementation = _python_impl,
     tag_classes = {
+        "dependencies": _dependencies,
         "version": _version,
     },
 )

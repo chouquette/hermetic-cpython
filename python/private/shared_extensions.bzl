@@ -1,5 +1,6 @@
 """Shared CPython extensions required by the test runtimes."""
 
+load("@cpython//python/private:copts.bzl", "VISIBILITY_COPTS")
 load("@cpython//python/private:dependencies.bzl", "dependency")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 
@@ -182,7 +183,7 @@ def _shared_extension(
         copts = [
             "-std=c11",
             "-fwrapv",
-        ],
+        ] + VISIBILITY_COPTS,
         deps = [headers] + deps,
         linkshared = True,
         linkopts = select({

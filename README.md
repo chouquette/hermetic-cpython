@@ -99,6 +99,18 @@ targets), and `bzip2_license`, `libffi_license`, `openssl_license`,
 `LICENSE.txt`). Only the root module may call `python.dependencies`, and at
 most once; the targets apply to every selected CPython version.
 
+## Patch the CPython sources
+
+The root module can apply its own patches to a selected version, after the
+module's own patches, with `-p1`:
+
+```starlark
+python.version(
+    version = "3.13",
+    patches = ["//third_party/cpython:my-change.patch"],
+)
+```
+
 ## Integration fixture
 
 [`tests/integration`](tests/integration) is a nested Bzlmod consumer. It selects

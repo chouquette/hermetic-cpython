@@ -77,6 +77,21 @@ python.dependencies(
 )
 ```
 
+To link a dependency dynamically, also give a target providing
+`CcSharedLibraryInfo` whose shared library exports that dependency, such as a
+`cc_shared_library` with the `cc_library` in its `deps`:
+
+```starlark
+python.dependencies(
+    zlib = "@my_zlib//:zlib",
+    zlib_shared_library = "@my_zlib//:z_shared",
+)
+```
+
+The shared library is added to `dynamic_deps` of the targets that link the
+dependency. `bzip2`, `libffi`, `openssl_crypto`, `openssl_ssl`, `sqlite3`, `xz`
+and `zlib` accept a `_shared_library` counterpart.
+
 Unset attributes keep their default. The attributes are `bzip2`, `libffi`,
 `openssl_crypto`, `openssl_ssl`, `sqlite3`, `xz` and `zlib` (`cc_library`
 targets), and `bzip2_license`, `libffi_license`, `openssl_license`,

@@ -1,7 +1,7 @@
 """Bzlmod extension for selecting CPython source releases."""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//python/private:dependencies.bzl", "DEPENDENCIES_REPOSITORY", "DEPENDENCY_DEFAULTS", "cpython_dependencies_repository")
+load("//python/private:dependencies.bzl", "DEPENDENCIES_REPOSITORY", "DEPENDENCY_DEFAULTS", "SHARED_LIBRARY_DEPENDENCIES", "cpython_dependencies_repository")
 load("//python/private:repositories.bzl", "cpython_source_repository")
 load("//python/private:versions.bzl", "CPYTHON_RELEASES")
 
@@ -12,6 +12,7 @@ def _python_impl(module_ctx):
     requested_versions = {}
     root_requested_versions = {}
     dependencies = dict(DEPENDENCY_DEFAULTS)
+    shared_libraries = {}
 
     for module in module_ctx.modules:
         for index, dependencies_tag in enumerate(module.tags.dependencies):
@@ -23,6 +24,10 @@ def _python_impl(module_ctx):
                 label = getattr(dependencies_tag, name)
                 if label:
                     dependencies[name] = str(label)
+            for name in SHARED_LIBRARY_DEPENDENCIES:
+                label = getattr(dependencies_tag, name + "_shared_library")
+                if label:
+                    shared_libraries[name] = str(label)
         for version_tag in module.tags.version:
             version = version_tag.version
             if version not in CPYTHON_RELEASES:
@@ -41,6 +46,7 @@ def _python_impl(module_ctx):
         cpython_dependencies_repository(
             name = DEPENDENCIES_REPOSITORY,
             dependencies = dependencies,
+            shared_libraries = shared_libraries,
         )
         http_archive(
             name = "cpython_libffi",
@@ -112,6 +118,11 @@ _dependencies = tag_class(
     attrs = {
         name: attr.label(doc = "Replaces the default `{}`.".format(default))
         for name, default in DEPENDENCY_DEFAULTS.items()
+    } | {
+        name + "_shared_library": attr.label(
+            doc = "A shared library exporting `{}`, linked instead of it.".format(name),
+        )
+        for name in SHARED_LIBRARY_DEPENDENCIES
     },
     doc = "Replaces the native libraries linked into every selected CPython version. Root module only.",
 )

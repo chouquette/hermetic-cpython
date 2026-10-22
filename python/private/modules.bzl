@@ -1,6 +1,6 @@
 """Static CPython module manifests for the pinned supported releases."""
 
-load("@cpython//python/private:dependencies.bzl", "dependency", "dependency_names")
+load("@cpython//python/private:dependencies.bzl", "dependency", "dependency_names", "shared_library_dependencies")
 load("@cpython//python/private:versions.bzl", "SUPPORTED_PYTHON_VERSIONS")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
@@ -806,6 +806,7 @@ def declare_cpython_shared_modules(
         categories,
         deps = [],
         copts = [],
+        shared_libraries = {},
         visibility = None):
     """Declares POSIX shared extension modules and a filegroup collecting them.
 
@@ -817,6 +818,7 @@ def declare_cpython_shared_modules(
         categories: Subset of bundled, posix, stdlib, and test.
         deps: Dependencies required by every module, including the Python headers.
         copts: C options required by every module. Do not define Py_BUILD_CORE.
+        shared_libraries: Shared libraries provided for native dependencies, by name.
         visibility: Visibility of the filegroup.
     """
     for category in categories:
@@ -846,6 +848,7 @@ def declare_cpython_shared_modules(
                 srcs = module.sources,
                 copts = module_copts + copts,
                 deps = deps + module_deps,
+                dynamic_deps = shared_library_dependencies(shared_libraries, dependency_names(module.deps)),
                 includes = module.includes,
                 linkopts = module.linkopts + select({
                     "@platforms//os:macos": ["-Wl,-undefined,dynamic_lookup"],

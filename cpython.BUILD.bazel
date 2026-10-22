@@ -672,6 +672,7 @@ declare_cpython_shared_modules(
         "stdlib",
     ],
     copts = COMMON_COPTS,
+    shared_libraries = SHARED_LIBRARIES,
     deps = [":headers"],
 )
 
@@ -987,6 +988,7 @@ LINUX_TARGET_COMPATIBILITY = select({
 
 cc_shared_library(
     name = "libpython",
+    dynamic_deps = shared_library_dependencies(SHARED_LIBRARIES, BOOTSTRAP_MODULES.dependencies),
     deps = [
         ":python_core_no_frozen",
         ":python_frozen",

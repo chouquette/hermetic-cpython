@@ -1,7 +1,7 @@
 """Bundled C libraries shipped in supported CPython release archives."""
 
-load("@cpython//python/private:versions.bzl", "CPYTHON_RELEASES")
 load("@cpython//python/private:copts.bzl", "VISIBILITY_COPTS")
+load("@cpython//python/private:versions.bzl", "CPYTHON_RELEASES")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
 def _supported_releases():
@@ -102,10 +102,10 @@ _BLAKE2_IMPLEMENTATION_SOURCES = [
     "Modules/_blake2/impl/blake2s.c",
 ]
 
-def _hacl_library(name, algorithm, visibility):
+def _hacl_library(name, algorithm, copts, visibility):
     cc_library(
         name = name,
-        copts = VISIBILITY_COPTS,
+        copts = copts + VISIBILITY_COPTS,
         srcs = ["Modules/_hacl/Hacl_Hash_{}.c".format(algorithm)],
         hdrs = native.glob(["Modules/_hacl/**/*.h"]),
         defines = [
@@ -122,6 +122,7 @@ def _hacl_library(name, algorithm, visibility):
 
 def bundled_libraries(
         version,
+        copts = [],
         python_headers = ":headers",
         visibility = ["//visibility:public"]):
     """Declares bundled-library targets in an unpacked CPython repository.
@@ -142,6 +143,7 @@ def bundled_libraries(
 
     Args:
         version: `3.12`, `3.12.13`, `3.13`, or `3.13.13`.
+        copts: C options for every bundled library.
         python_headers: Target providing the generated `pyconfig.h` used by
             CPython's bundled Expat configuration.
         visibility: Visibility assigned to every bundled-library target.
@@ -159,7 +161,7 @@ def bundled_libraries(
 
     cc_library(
         name = "bundled_expat",
-        copts = VISIBILITY_COPTS,
+        copts = copts + VISIBILITY_COPTS,
         srcs = [
             "Modules/expat/xmlparse.c",
             "Modules/expat/xmlrole.c",
@@ -188,7 +190,7 @@ def bundled_libraries(
 
     cc_library(
         name = "bundled_libmpdec",
-        copts = VISIBILITY_COPTS,
+        copts = copts + VISIBILITY_COPTS,
         srcs = _LIBMPDEC_SOURCES,
         hdrs = _LIBMPDEC_HEADERS,
         defines = [
@@ -208,15 +210,15 @@ def bundled_libraries(
     )
 
     if version not in ["3.11", "3.11.15"]:
-        _hacl_library("bundled_hacl_md5", "MD5", visibility)
-        _hacl_library("bundled_hacl_sha1", "SHA1", visibility)
-        _hacl_library("bundled_hacl_sha2", "SHA2", visibility)
-        _hacl_library("bundled_hacl_sha3", "SHA3", visibility)
+        _hacl_library("bundled_hacl_md5", "MD5", copts, visibility)
+        _hacl_library("bundled_hacl_sha1", "SHA1", copts, visibility)
+        _hacl_library("bundled_hacl_sha2", "SHA2", copts, visibility)
+        _hacl_library("bundled_hacl_sha3", "SHA3", copts, visibility)
 
     if version in ["3.14", "3.14.5"]:
         cc_library(
             name = "bundled_hacl_blake2",
-            copts = VISIBILITY_COPTS,
+            copts = copts + VISIBILITY_COPTS,
             srcs = [
                 "Modules/_hacl/Hacl_Hash_Blake2b.c",
                 "Modules/_hacl/Hacl_Hash_Blake2s.c",
@@ -236,7 +238,7 @@ def bundled_libraries(
         )
         cc_library(
             name = "bundled_hacl_hmac",
-            copts = VISIBILITY_COPTS,
+            copts = copts + VISIBILITY_COPTS,
             srcs = [
                 "Modules/_hacl/Hacl_HMAC.c",
                 "Modules/_hacl/Hacl_Streaming_HMAC.c",

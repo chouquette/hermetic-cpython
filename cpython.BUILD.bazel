@@ -150,13 +150,6 @@ copy_file(
 )
 
 cc_library(
-    name = "hermetic_sqlite3",
-    srcs = ["@sqlite3//:sqlite3.c"],
-    hdrs = [":sqlite3_header"],
-    defines = ["SQLITE_ENABLE_FTS4=1"],
-)
-
-cc_library(
     name = "sqlite3_dll_objects",
     srcs = ["@sqlite3//:sqlite3.c"],
     hdrs = [":sqlite3_header"],

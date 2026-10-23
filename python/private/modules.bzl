@@ -128,7 +128,7 @@ _STDLIB_COMMON = [
     _module(
         "_sqlite3",
         "stdlib",
-        deps = [":hermetic_sqlite3"],
+        deps = ["@cpython//python/private/deps:sqlite3"],
         platform = "posix",
     ),
     _module("_zoneinfo", "stdlib"),

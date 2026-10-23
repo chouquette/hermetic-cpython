@@ -1,6 +1,7 @@
 """Bzlmod extension for selecting CPython source releases."""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("//python/private:dependencies.bzl", "DEPENDENCIES_REPOSITORY", "DEPENDENCY_DEFAULTS", "cpython_dependencies_repository")
 load("//python/private:repositories.bzl", "cpython_source_repository")
 load("//python/private:versions.bzl", "CPYTHON_RELEASES")
 
@@ -10,6 +11,7 @@ _LIBFFI_BUILD_FILE = Label("//:libffi.BUILD.bazel")
 def _python_impl(module_ctx):
     requested_versions = {}
     root_requested_versions = {}
+    dependencies = dict(DEPENDENCY_DEFAULTS)
 
     for module in module_ctx.modules:
         for version_tag in module.tags.version:
@@ -27,6 +29,10 @@ def _python_impl(module_ctx):
                 root_requested_versions[version] = True
 
     if requested_versions:
+        cpython_dependencies_repository(
+            name = DEPENDENCIES_REPOSITORY,
+            dependencies = dependencies,
+        )
         http_archive(
             name = "cpython_libffi",
             build_file = _LIBFFI_BUILD_FILE,

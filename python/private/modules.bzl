@@ -1,6 +1,6 @@
 """Static CPython module manifests for the pinned supported releases."""
 
-load("@cpython//python/private:dependencies.bzl", "dependency")
+load("@cpython//python/private:dependencies.bzl", "dependency", "dependency_names")
 load("@cpython//python/private:versions.bzl", "SUPPORTED_PYTHON_VERSIONS")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 
@@ -609,7 +609,8 @@ def declare_cpython_static_modules(
         tags: Tags for every generated target.
 
     Returns:
-        A struct containing library, module_libraries, and registry_source labels.
+        A struct containing library, module_libraries, and registry_source labels,
+        and the names of the native dependencies used by the modules.
     """
     selected_categories = _SUPPORTED_CATEGORIES if categories == None else categories
     for category in selected_categories:
@@ -764,6 +765,7 @@ def declare_cpython_static_modules(
     )
 
     return struct(
+        dependencies = dependency_names([dep for module in modules for dep in module.deps]),
         library = ":{}".format(name),
         module_libraries = generated_module_libraries,
         registry_source = ":{}".format(registry_source_target),

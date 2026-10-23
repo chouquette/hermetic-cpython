@@ -1,5 +1,7 @@
 """Build-time generation of CPython sysconfig metadata."""
 
+load("@cpython//python/private:platforms.bzl", "DEFAULT_MACOSX_DEPLOYMENT_TARGET")
+
 def merge_sysconfig_build_vars(common, platform):
     """Returns one build-variable dictionary without mutating either input."""
     result = dict(common)
@@ -73,6 +75,10 @@ def _cpython_sysconfig_impl(ctx):
     platform_tag = ctx.attr.platform_tag
     if ctx.attr.platform not in ["darwin", "linux", "windows"]:
         fail("unsupported CPython sysconfig platform: {}".format(ctx.attr.platform))
+    if ctx.attr.platform == "darwin":
+        deployment_target = str(ctx.fragments.apple.macos_minimum_os_flag or DEFAULT_MACOSX_DEPLOYMENT_TARGET)
+        build_vars["MACOSX_DEPLOYMENT_TARGET"] = deployment_target
+        platform_tag = platform_tag.format(macosx_deployment_target = deployment_target)
 
     forbidden_runtime_vars = [
         "base",
@@ -196,6 +202,7 @@ def _cpython_sysconfig_impl(ctx):
 
 cpython_sysconfig = rule(
     implementation = _cpython_sysconfig_impl,
+    fragments = ["apple"],
     attrs = {
         "build_details_schema": attr.string(),
         "build_vars": attr.string_dict(mandatory = True),

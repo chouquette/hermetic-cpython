@@ -14,6 +14,7 @@ def _python_impl(module_ctx):
     dependencies = dict(DEPENDENCY_DEFAULTS)
     shared_libraries = {}
     root_patches = {}
+    root_copts = {}
 
     for module in module_ctx.modules:
         for index, dependencies_tag in enumerate(module.tags.dependencies):
@@ -42,7 +43,10 @@ def _python_impl(module_ctx):
             requested_versions[version] = True
             if module.is_root:
                 root_requested_versions[version] = True
+                root_copts.setdefault(version, []).extend(version_tag.copts)
                 root_patches.setdefault(version, []).extend(version_tag.patches)
+            elif version_tag.copts:
+                fail("python.version(copts = ...) may only be used by the root module, not {!r}".format(module.name))
             elif version_tag.patches:
                 fail("python.version(patches = ...) may only be used by the root module, not {!r}".format(module.name))
 
@@ -73,6 +77,7 @@ def _python_impl(module_ctx):
             build_file = _BUILD_FILE,
             build_details_schema = release.build_details_schema or "",
             cache_tag = release.cache_tag,
+            copts = root_copts.get(version, []),
             hexversion = release.hexversion,
             major = release.major,
             micro = release.micro,
@@ -113,6 +118,9 @@ def _python_impl(module_ctx):
 
 _version = tag_class(
     attrs = {
+        "copts": attr.string_list(
+            doc = "C options added after the default optimization options of the CPython sources, such as -O2. Root module only.",
+        ),
         "patches": attr.label_list(
             doc = "Patches applied to the CPython sources after the module's own, with -p1. Root module only.",
         ),

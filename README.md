@@ -62,6 +62,16 @@ The LLVM toolchains build each selected CPython release for Linux, macOS, and
 Windows on arm64 and x86_64. Windows targets use the MSVC ABI, the hermetic MSVC
 runtime, and the hermetic Windows SDK supplied by `windows_support`.
 
+## Add C options
+
+The root module can add C options to a selected version. They come after the
+default optimization options, so they can override them:
+
+```starlark
+python.version(
+    version = "3.13",
+    copts = ["-O2"],
+
 ## Replace native dependencies
 
 By default, the interpreters link the `openssl`, `zlib`, `xz`, `bzip2` and
